@@ -10,8 +10,8 @@ namespace TaskbarTool
         public static Options Options = new Options();
 
         // My Documents
-        private static string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        private static string FilePath = MyDocuments + "\\TaskbarTools\\Options.xml";
+        private static readonly string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        private static readonly string FilePath = MyDocuments + "\\TaskbarTools\\Options.xml";
 
         public static void InitializeOptions()
         {
@@ -71,7 +71,7 @@ namespace TaskbarTool
             Options.Settings.StartMinimized = false;
             Options.Settings.StartWhenLaunched = true;
             Options.Settings.StartWithWindows = false;
-            Options.Settings.UseDifferentSettingsWhenMaximized = true;
+            Options.Settings.UseDifferentSettingsWhenMaximized = false;
 
             Options.Settings.MainTaskbarStyle = new OptionsSettingsMainTaskbarStyle();
             Options.Settings.MainTaskbarStyle.AccentState = 3;
