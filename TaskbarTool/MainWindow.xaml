@@ -1,117 +1,113 @@
 ﻿<Window x:Class="TaskbarTool.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TaskbarTool"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
-        mc:Ignorable="d"
-        Title="Taskbar Tools" 
-        Height="210" Width="370" 
-        MinHeight="190" MinWidth="400"
-        Icon="Resources/tt-logo.ico"
-        ContentRendered="Window_ContentRendered" Closing="Window_Closing">
-    <Window.Resources>
-        <!-- Tray Icon ContextMenu -->
-        <ContextMenu x:Key="TrayContextMenu">
-            <ContextMenu.Items>
-                <MenuItem x:Name="SysTrayStartStopButton" Header="Pause/Resume" Click="StartStopButton_Click"/>
-                <Separator/>
-                <MenuItem x:Name="SysTrayQuitButton" Header="Quit" IsEnabled="True" Click="CloseMainWindow"/>
-            </ContextMenu.Items>
-        </ContextMenu>
-    </Window.Resources>
-    <Grid x:Name="MainGrid">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="32"/>
-            <RowDefinition Height="0"/>
-        </Grid.RowDefinitions>
-        <Grid x:Name="AccentPolicyGrid" Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="140"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Label x:Name="AccentStateLabel" Content="Accent State" Grid.Column="0"
-                   HorizontalAlignment="Right" VerticalAlignment="Top"
-                   HorizontalContentAlignment="Right"
-                   Margin="0,10,0,0"/>
-            <Label x:Name="GradientColorLabel" Content="Gradient Color" Grid.Column="0"
-                   HorizontalAlignment="Right" VerticalAlignment="Top"
-                   HorizontalContentAlignment="Right"
-                   Margin="0,37,0,0"/>
-            <Label x:Name="ColorizeBlurLabel" Content="Colorize" Grid.Column="0"
-                   HorizontalAlignment="Right" VerticalAlignment="Top"
-                   HorizontalContentAlignment="Right"
-                   Margin="0,63,0,0"/>
-            <Label x:Name="WindowsAccentOpacityLabel" Content="Windows Accent Alpha" Grid.Column="0"
-                   HorizontalAlignment="Right" VerticalAlignment="Top"
-                   HorizontalContentAlignment="Right"
-                   Margin="0,86,0,0" />
-            <Button x:Name="EditSwitchButton" Content="Taskbar"  Grid.Column="0"
-                HorizontalAlignment="Right" VerticalAlignment="Top"
-                Margin="0,117,4,0"
-                Style="{StaticResource HyperlinkLikeButton}"
-                Foreground="#FF8080FF"
-                Click="EditSwitchButton_Click"/>
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:TaskbarTool"
+		xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+		mc:Ignorable="d"
+		Title="Taskbar Tools" 
+		Height="210" Width="370" 
+		MinHeight="190" MinWidth="400"
+		Icon="Resources/tt-logo.ico"
+		ContentRendered="Window_ContentRendered" Closing="Window_Closing">
+	<Window.Resources>
+		<!-- Tray Icon ContextMenu -->
+		<ContextMenu x:Key="TrayContextMenu">
+			<ContextMenu.Items>
+				<MenuItem x:Name="SysTrayStartStopButton" Header="Pause/Resume" Click="StartStopButton_Click"/>
+				<Separator/>
+				<MenuItem x:Name="SysTrayQuitButton" Header="Quit" IsEnabled="True" Click="CloseMainWindow"/>
+			</ContextMenu.Items>
+		</ContextMenu>
+	</Window.Resources>
+	<Grid x:Name="MainGrid">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="32"/>
+			<RowDefinition Height="0"/>
+		</Grid.RowDefinitions>
+		<Grid x:Name="AccentPolicyGrid" Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="140"/>
+				<ColumnDefinition Width="*"/>
+			</Grid.ColumnDefinitions>
+			<Label x:Name="AccentStateLabel" Content="Accent State" Grid.Column="0"
+				   HorizontalAlignment="Right" VerticalAlignment="Top"
+				   HorizontalContentAlignment="Right"
+				   Margin="0,12,0,0"/>
+			<Label x:Name="GradientColorLabel" Content="Gradient Color" Grid.Column="0"
+				   HorizontalAlignment="Right" VerticalAlignment="Top"
+				   HorizontalContentAlignment="Right"
+				   Margin="0,37,0,0"/>
+			<Label x:Name="ColorizeBlurLabel" Content="Colorize" Grid.Column="0"
+				   HorizontalAlignment="Right" VerticalAlignment="Top"
+				   HorizontalContentAlignment="Right"
+				   Margin="0,63,0,0"/>
+			<Label x:Name="WindowsAccentOpacityLabel" Content="Windows Accent Alpha" Grid.Column="0"
+				   HorizontalAlignment="Right" VerticalAlignment="Top"
+				   HorizontalContentAlignment="Right"
+				   Margin="0,88,0,0" />
+			<Button x:Name="EditSwitchButton" Content="Taskbar"  Grid.Column="0"
+				HorizontalAlignment="Right" VerticalAlignment="Top"
+				Margin="0,117,4,0"
+				Style="{StaticResource HyperlinkLikeButton}"
+				Foreground="#FF8080FF"
+				Click="EditSwitchButton_Click"/>
 
-            <ComboBox x:Name="AccentStateComboBox" Grid.Column="1"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                      Margin="0,14,10,0"
-                      SelectionChanged="AccentStateComboBox_SelectionChanged" />
-            <xctk:ColorPicker x:Name="GradientColorPicker" Grid.Column="1"
-                              HorizontalAlignment="Left" VerticalAlignment="Top"
-                              Margin="0,41,0,0" Width="50"
-                              ColorMode="ColorCanvas"
-                              ShowDropDownButton="False"
-                              ShowAdvancedButton="False"
-                              SelectedColorChanged="GradientColorPicker_SelectedColorChanged"/>
-            <CheckBox x:Name="ColorizeBlurCheckBox" Grid.Column="1" Content=""
-                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                      Margin="0,69,0,0"
-                      Checked="ColorizeBlurCheckBox_Changed"
-                      Unchecked="ColorizeBlurCheckBox_Changed"/>
-            <CheckBox x:Name="WindowsAccentColorCheckBox" Grid.Column="1" Content="Use Windows Accent Colour"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                      Margin="55,43,0,0" 
-                      Checked="WindowsAccentColorCheckBox_Changed"
-                      Unchecked="WindowsAccentColorCheckBox_Changed"/>
-            <Slider x:Name="WindowsAccentAlphaSlider" Grid.Column="1"
-                    HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                    Margin="0,92,10,0" Minimum="0" Maximum="255"
-                    Thumb.DragCompleted="WindowsAccentAlphaSlider_DragCompleted"
-                    Thumb.DragStarted="WindowsAccentAlphaSlider_DragStarted"
-                    ValueChanged="WindowsAccentAlphaSlider_ValueChanged"/>
-        </Grid>
-        <Grid x:Name="ControlsGrid" Grid.Row="1">
-            <Button x:Name="StartStopButton" Content="Start" 
-                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                    Margin="0,0,10,5" Width="75" 
-                    Click="StartStopButton_Click"/>
-            <Button x:Name="OptionsButton" Content="Options" 
-                    HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                    Margin="10,0,0,7" Width="75" 
-                    Style="{StaticResource HyperlinkLikeButton}"
-                    Foreground="#FF8080FF"
-                    Click="OptionsButton_Click"/>
-        </Grid>
-        <Grid x:Name="OptionsGrid" Grid.Row="2">
-            <CheckBox x:Name="StartMinimizedCheckBox" Content="Start Minimized"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                      Margin="10,5,0,0" />
-            <CheckBox x:Name="StartWhenLaunchedCheckBox" Content="Apply Settings When Started"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                      Margin="10,25,0,0" />
-            <CheckBox x:Name="UseMaximizedSettingsCheckBox" Content="Use Different Settings when a Window is Maximized"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                      Margin="10,65,0,0" 
-                      Checked="UseMaximizedSettingsCheckBox_Changed"
-                      Unchecked="UseMaximizedSettingsCheckBox_Changed"/>
-            <CheckBox x:Name="StartWithWindowsCheckBox" Content="Start With Windows"
-                      HorizontalAlignment="Left" VerticalAlignment="Top"
-                      Margin="10,45,0,0" 
-                      Checked="StartWithWindowsCheckBox_Changed"
-                      Unchecked="StartWithWindowsCheckBox_Changed"/>
-        </Grid>
-    </Grid>
+			<ComboBox x:Name="AccentStateComboBox" Grid.Column="1" VerticalAlignment="Top"
+					  Margin="0,14,10,0"
+					  SelectionChanged="AccentStateComboBox_SelectionChanged" />
+			<xctk:ColorPicker x:Name="GradientColorPicker" Grid.Column="1"
+							  HorizontalAlignment="Left" VerticalAlignment="Top"
+							  Margin="0,39,0,0" Width="50"
+							  ColorMode="ColorCanvas"
+							  SelectedColorChanged="GradientColorPicker_SelectedColorChanged"/>
+			<CheckBox x:Name="ColorizeBlurCheckBox" Grid.Column="1" Content=""
+					  HorizontalAlignment="Left" VerticalAlignment="Top"
+					  Margin="0,68,0,0"
+					  Checked="ColorizeBlurCheckBox_Changed"
+					  Unchecked="ColorizeBlurCheckBox_Changed"/>
+			<CheckBox x:Name="WindowsAccentColorCheckBox" Grid.Column="1" Content="Use Windows Accent Colour"
+					  HorizontalAlignment="Left" VerticalAlignment="Top"
+					  Margin="55,42,0,0" 
+					  Checked="WindowsAccentColorCheckBox_Changed"
+					  Unchecked="WindowsAccentColorCheckBox_Changed"/>
+			<Slider x:Name="WindowsAccentAlphaSlider" Grid.Column="1" VerticalAlignment="Top"
+					Margin="0,92,10,0" Minimum="0" Maximum="255"
+					Thumb.DragCompleted="WindowsAccentAlphaSlider_DragCompleted"
+					Thumb.DragStarted="WindowsAccentAlphaSlider_DragStarted"
+					ValueChanged="WindowsAccentAlphaSlider_ValueChanged"/>
+		</Grid>
+		<Grid x:Name="ControlsGrid" Grid.Row="1">
+			<Button x:Name="StartStopButton" Content="Start" 
+					HorizontalAlignment="Right" VerticalAlignment="Bottom"
+					Margin="0,0,10,5" Width="75" 
+					Click="StartStopButton_Click"/>
+			<Button x:Name="OptionsButton" Content="Options" 
+					HorizontalAlignment="Left" VerticalAlignment="Bottom"
+					Margin="10,0,0,7" Width="75" 
+					Style="{StaticResource HyperlinkLikeButton}"
+					Foreground="#FF8080FF"
+					Click="OptionsButton_Click"/>
+		</Grid>
+		<Grid x:Name="OptionsGrid" Grid.Row="2">
+			<CheckBox x:Name="StartMinimizedCheckBox" Content="Start Minimized"
+					  HorizontalAlignment="Left" VerticalAlignment="Top"
+					  Margin="10,5,0,0" />
+			<CheckBox x:Name="StartWhenLaunchedCheckBox" Content="Apply Settings When Started"
+					  HorizontalAlignment="Left" VerticalAlignment="Top"
+					  Margin="10,25,0,0" />
+			<CheckBox x:Name="UseMaximizedSettingsCheckBox" Content="Use Different Settings when a Window is Maximized"
+					  HorizontalAlignment="Left" VerticalAlignment="Top"
+					  Margin="10,65,0,0" 
+					  Checked="UseMaximizedSettingsCheckBox_Changed"
+					  Unchecked="UseMaximizedSettingsCheckBox_Changed"/>
+			<CheckBox x:Name="StartWithWindowsCheckBox" Content="Start With Windows"
+					  HorizontalAlignment="Left" VerticalAlignment="Top"
+					  Margin="10,45,0,0" 
+					  Checked="StartWithWindowsCheckBox_Changed"
+					  Unchecked="StartWithWindowsCheckBox_Changed"/>
+		</Grid>
+	</Grid>
 </Window>

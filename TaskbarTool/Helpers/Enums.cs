@@ -11,12 +11,12 @@
 
 	public enum AccentState
 	{
-		ACCENT_DISABLED = 0,
-		ACCENT_ENABLE_GRADIENT = 1,
-		ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
-		ACCENT_ENABLE_BLURBEHIND = 3,
-		ACCENT_ENABLE_ACRYLIC = 4,
-		ACCENT_INVALID_STATE = 5
+		Disabled = 0,
+		Gradient = 1,
+		Transparent = 2,
+		Blur = 3,
+		Acrylic = 4,
+		Invalid = 5
 	}
 
 	public enum WindowCompositionAttribute

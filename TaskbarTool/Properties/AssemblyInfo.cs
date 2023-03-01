@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
@@ -12,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TaskbarTool")]
-[assembly: AssemblyCopyright("Copyright © The Internet 2017")]
+[assembly: AssemblyCopyright("Copyright © The Internet 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -23,7 +21,7 @@ using System.Windows;
 
 //In order to begin building localizable applications, set 
 //<UICulture>CultureYouAreCodingWith</UICulture> in your .csproj file
-//inside a <PropertyGroup>.  For example, if you are using US english
+//inside a <PropertyGroup>.  For example, if you are using US English
 //in your source files, set the <UICulture> to en-US.  Then uncomment
 //the NeutralResourceLanguage attribute below.  Update the "en-US" in
 //the line below to match the UICulture setting in the project file.
@@ -32,12 +30,12 @@ using System.Windows;
 
 
 [assembly: ThemeInfo(
-    ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located
-                                     //(used if a resource is not found in the page, 
-                                     // or application resource dictionaries)
-    ResourceDictionaryLocation.SourceAssembly //where the generic resource dictionary is located
-                                              //(used if a resource is not found in the page, 
-                                              // app, or any theme specific resource dictionaries)
+	ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located
+									 //(used if a resource is not found in the page, 
+									 // or application resource dictionaries)
+	ResourceDictionaryLocation.SourceAssembly //where the generic resource dictionary is located
+											  //(used if a resource is not found in the page, 
+											  // app, or any theme specific resource dictionaries)
 )]
 
 
@@ -51,5 +49,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.8")]
-[assembly: AssemblyFileVersion("1.0.8")]
+[assembly: AssemblyVersion("1.1.1")]
+[assembly: AssemblyFileVersion("1.1.1")]

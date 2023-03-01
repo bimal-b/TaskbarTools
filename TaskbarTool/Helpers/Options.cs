@@ -4,407 +4,413 @@ using System.Xml.Serialization;
 
 namespace TaskbarTool
 {
-    public static class TT
-    {
-        // Options
-        public static Options Options = new Options();
+	public static class TT
+	{
+		// Options
+		public static Options Options = new Options();
 
-        // My Documents
-        private static readonly string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        private static readonly string FilePath = MyDocuments + "\\TaskbarTools\\Options.xml";
+		// My Documents
+		private static readonly string MyDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+		private static readonly string FilePath = MyDocuments + "\\TaskbarTools\\Options.xml";
 
-        public static void InitializeOptions()
-        {
-            if (!LoadOptions())
-            {
-                AssignDefaults();
-            }
-        }
+		public static void InitializeOptions()
+		{
+			if (!LoadOptions())
+			{
+				AssignDefaults();
+			}
+		}
 
-        public static bool SaveOptions()
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(Options));
+		public static bool SaveOptions()
+		{
+			XmlSerializer serializer = new XmlSerializer(typeof(Options));
 
-            try
-            {
-                if (!Directory.Exists(Path.GetDirectoryName(FilePath)))
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
-                }
+			try
+			{
+				var dirPath = Path.GetDirectoryName(FilePath);
 
-                using (FileStream fstream = new FileStream(FilePath, FileMode.Create))
-                {
-                    serializer.Serialize(fstream, Options);
-                }
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            return true;
-        }
+				if (!Directory.Exists(dirPath))
+				{
+					Directory.CreateDirectory(dirPath);
+				}
 
-        private static bool LoadOptions()
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(Options));
-            if (!File.Exists(FilePath)) { return false; }
+				using (FileStream fstream = new FileStream(FilePath, FileMode.Create))
+				{
+					serializer.Serialize(fstream, Options);
+				}
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+			return true;
+		}
 
-            try
-            {
-                using (FileStream reader = new FileStream(FilePath, FileMode.Open))
-                {
-                    Options = serializer.Deserialize(reader) as Options;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("!! Error loading Options.xml");
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-            return true;
-        }
+		private static bool LoadOptions()
+		{
+			XmlSerializer serializer = new XmlSerializer(typeof(Options));
+			if (!File.Exists(FilePath)) { return false; }
 
-        private static void AssignDefaults()
-        {
-            Options.Settings = new OptionsSettings();
-            Options.Settings.StartMinimized = false;
-            Options.Settings.StartWhenLaunched = true;
-            Options.Settings.StartWithWindows = false;
-            Options.Settings.UseDifferentSettingsWhenMaximized = false;
+			try
+			{
+				using (FileStream reader = new FileStream(FilePath, FileMode.Open))
+				{
+					Options = serializer.Deserialize(reader) as Options;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("!! Error loading Options.xml");
+				Console.WriteLine(ex.Message);
+				return false;
+			}
+			return true;
+		}
 
-            Options.Settings.MainTaskbarStyle = new OptionsSettingsMainTaskbarStyle();
-            Options.Settings.MainTaskbarStyle.AccentState = 3;
-            Options.Settings.MainTaskbarStyle.GradientColor = "#804080FF";
-            Options.Settings.MainTaskbarStyle.Colorize = true;
-            Options.Settings.MainTaskbarStyle.UseWindowsAccentColor = true;
-            Options.Settings.MainTaskbarStyle.WindowsAccentAlpha = 127;
+		private static void AssignDefaults()
+		{
+			Options.Settings = new OptionsSettings
+			{
+				StartMinimized = false,
+				StartWhenLaunched = true,
+				StartWithWindows = false,
+				UseDifferentSettingsWhenMaximized = false,
 
-            Options.Settings.MaximizedTaskbarStyle = new OptionsSettingsMaximizedTaskbarStyle();
-            Options.Settings.MaximizedTaskbarStyle.AccentState = 2;
-            Options.Settings.MaximizedTaskbarStyle.GradientColor = "#FF000000";
-            Options.Settings.MaximizedTaskbarStyle.Colorize = false;
-            Options.Settings.MaximizedTaskbarStyle.UseWindowsAccentColor = true;
-            Options.Settings.MaximizedTaskbarStyle.WindowsAccentAlpha = 255;
-        }
-    }
+				MainTaskbarStyle = new OptionsSettingsMainTaskbarStyle()
+			};
+			Options.Settings.MainTaskbarStyle.AccentState = 3;
+			Options.Settings.MainTaskbarStyle.GradientColor = "#804080FF";
+			Options.Settings.MainTaskbarStyle.Colorize = true;
+			Options.Settings.MainTaskbarStyle.UseWindowsAccentColor = true;
+			Options.Settings.MainTaskbarStyle.WindowsAccentAlpha = 127;
 
-    #region XML Classes
+			Options.Settings.MaximizedTaskbarStyle = new OptionsSettingsMaximizedTaskbarStyle
+			{
+				AccentState = 2,
+				GradientColor = "#FF000000",
+				Colorize = false,
+				UseWindowsAccentColor = true,
+				WindowsAccentAlpha = 255
+			};
+		}
+	}
 
-    /// <remarks/>
-    [System.SerializableAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
-    public partial class Options
-    {
+	#region XML Classes
 
-        private OptionsSettings settingsField;
+	/// <remarks/>
+	[Serializable()]
+	[System.ComponentModel.DesignerCategory("code")]
+	[XmlType(AnonymousType = true)]
+	[XmlRoot(Namespace = "", IsNullable = false)]
+	public partial class Options
+	{
 
-        private byte versionField;
+		private OptionsSettings settingsField;
 
-        /// <remarks/>
-        public OptionsSettings Settings
-        {
-            get
-            {
-                return this.settingsField;
-            }
-            set
-            {
-                this.settingsField = value;
-            }
-        }
+		private byte versionField;
 
-        /// <remarks/>
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public byte Version
-        {
-            get
-            {
-                return this.versionField;
-            }
-            set
-            {
-                this.versionField = value;
-            }
-        }
-    }
+		/// <remarks/>
+		public OptionsSettings Settings
+		{
+			get
+			{
+				return settingsField;
+			}
+			set
+			{
+				settingsField = value;
+			}
+		}
 
-    /// <remarks/>
-    [System.SerializableAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class OptionsSettings
-    {
+		/// <remarks/>
+		[XmlAttribute()]
+		public byte Version
+		{
+			get
+			{
+				return versionField;
+			}
+			set
+			{
+				versionField = value;
+			}
+		}
+	}
 
-        private bool startMinimizedField;
+	/// <remarks/>
+	[Serializable()]
+	[System.ComponentModel.DesignerCategory("code")]
+	[XmlType(AnonymousType = true)]
+	public partial class OptionsSettings
+	{
 
-        private bool startWhenLaunchedField;
+		private bool startMinimizedField;
 
-        private bool startWithWindowsField;
+		private bool startWhenLaunchedField;
 
-        private bool useDifferentSettingsWhenMaximizedField;
+		private bool startWithWindowsField;
 
-        private OptionsSettingsMainTaskbarStyle mainTaskbarStyleField;
+		private bool useDifferentSettingsWhenMaximizedField;
 
-        private OptionsSettingsMaximizedTaskbarStyle maximizedTaskbarStyleField;
+		private OptionsSettingsMainTaskbarStyle mainTaskbarStyleField;
 
-        /// <remarks/>
-        public bool StartMinimized
-        {
-            get
-            {
-                return this.startMinimizedField;
-            }
-            set
-            {
-                this.startMinimizedField = value;
-            }
-        }
+		private OptionsSettingsMaximizedTaskbarStyle maximizedTaskbarStyleField;
 
-        /// <remarks/>
-        public bool StartWhenLaunched
-        {
-            get
-            {
-                return this.startWhenLaunchedField;
-            }
-            set
-            {
-                this.startWhenLaunchedField = value;
-            }
-        }
+		/// <remarks/>
+		public bool StartMinimized
+		{
+			get
+			{
+				return startMinimizedField;
+			}
+			set
+			{
+				startMinimizedField = value;
+			}
+		}
 
-        /// <remarks/>
-        public bool StartWithWindows
-        {
-            get
-            {
-                return this.startWithWindowsField;
-            }
-            set
-            {
-                this.startWithWindowsField = value;
-            }
-        }
+		/// <remarks/>
+		public bool StartWhenLaunched
+		{
+			get
+			{
+				return startWhenLaunchedField;
+			}
+			set
+			{
+				startWhenLaunchedField = value;
+			}
+		}
 
-        /// <remarks/>
-        public bool UseDifferentSettingsWhenMaximized
-        {
-            get
-            {
-                return this.useDifferentSettingsWhenMaximizedField;
-            }
-            set
-            {
-                this.useDifferentSettingsWhenMaximizedField = value;
-            }
-        }
+		/// <remarks/>
+		public bool StartWithWindows
+		{
+			get
+			{
+				return startWithWindowsField;
+			}
+			set
+			{
+				startWithWindowsField = value;
+			}
+		}
 
-        /// <remarks/>
-        public OptionsSettingsMainTaskbarStyle MainTaskbarStyle
-        {
-            get
-            {
-                return this.mainTaskbarStyleField;
-            }
-            set
-            {
-                this.mainTaskbarStyleField = value;
-            }
-        }
+		/// <remarks/>
+		public bool UseDifferentSettingsWhenMaximized
+		{
+			get
+			{
+				return useDifferentSettingsWhenMaximizedField;
+			}
+			set
+			{
+				useDifferentSettingsWhenMaximizedField = value;
+			}
+		}
 
-        /// <remarks/>
-        public OptionsSettingsMaximizedTaskbarStyle MaximizedTaskbarStyle
-        {
-            get
-            {
-                return this.maximizedTaskbarStyleField;
-            }
-            set
-            {
-                this.maximizedTaskbarStyleField = value;
-            }
-        }
-    }
+		/// <remarks/>
+		public OptionsSettingsMainTaskbarStyle MainTaskbarStyle
+		{
+			get
+			{
+				return mainTaskbarStyleField;
+			}
+			set
+			{
+				mainTaskbarStyleField = value;
+			}
+		}
 
-    /// <remarks/>
-    [System.SerializableAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class OptionsSettingsMainTaskbarStyle
-    {
+		/// <remarks/>
+		public OptionsSettingsMaximizedTaskbarStyle MaximizedTaskbarStyle
+		{
+			get
+			{
+				return maximizedTaskbarStyleField;
+			}
+			set
+			{
+				maximizedTaskbarStyleField = value;
+			}
+		}
+	}
 
-        private byte accentStateField;
+	/// <remarks/>
+	[Serializable()]
+	[System.ComponentModel.DesignerCategory("code")]
+	[XmlType(AnonymousType = true)]
+	public partial class OptionsSettingsMainTaskbarStyle
+	{
 
-        private string gradientColorField;
+		private byte accentStateField;
 
-        private bool colorizeField;
+		private string gradientColorField;
 
-        private bool useWindowsAccentColorField;
+		private bool colorizeField;
 
-        private byte windowsAccentAlphaField;
+		private bool useWindowsAccentColorField;
 
-        /// <remarks/>
-        public byte AccentState
-        {
-            get
-            {
-                return this.accentStateField;
-            }
-            set
-            {
-                this.accentStateField = value;
-                Taskbars.UpdateAccentState();
-            }
-        }
+		private byte windowsAccentAlphaField;
 
-        /// <remarks/>
-        public string GradientColor
-        {
-            get
-            {
-                return this.gradientColorField;
-            }
-            set
-            {
-                this.gradientColorField = value;
-                Taskbars.UpdateColor();
-            }
-        }
+		/// <remarks/>
+		public byte AccentState
+		{
+			get
+			{
+				return accentStateField;
+			}
+			set
+			{
+				accentStateField = value;
+				Taskbars.UpdateAccentState();
+			}
+		}
 
-        /// <remarks/>
-        public bool Colorize
-        {
-            get
-            {
-                return this.colorizeField;
-            }
-            set
-            {
-                this.colorizeField = value;
-                Taskbars.UpdateAccentFlags();
-            }
-        }
+		/// <remarks/>
+		public string GradientColor
+		{
+			get
+			{
+				return gradientColorField;
+			}
+			set
+			{
+				gradientColorField = value;
+				Taskbars.UpdateColor();
+			}
+		}
 
-        /// <remarks/>
-        public bool UseWindowsAccentColor
-        {
-            get
-            {
-                return this.useWindowsAccentColorField;
-            }
-            set
-            {
-                this.useWindowsAccentColorField = value;
-                Taskbars.UpdateColor();
-            }
-        }
+		/// <remarks/>
+		public bool Colorize
+		{
+			get
+			{
+				return colorizeField;
+			}
+			set
+			{
+				colorizeField = value;
+				Taskbars.UpdateAccentFlags();
+			}
+		}
 
-        /// <remarks/>
-        public byte WindowsAccentAlpha
-        {
-            get
-            {
-                return this.windowsAccentAlphaField;
-            }
-            set
-            {
-                this.windowsAccentAlphaField = value;
-                if (UseWindowsAccentColor) { Taskbars.UpdateColor(); }
-            }
-        }
-    }
+		/// <remarks/>
+		public bool UseWindowsAccentColor
+		{
+			get
+			{
+				return useWindowsAccentColorField;
+			}
+			set
+			{
+				useWindowsAccentColorField = value;
+				Taskbars.UpdateColor();
+			}
+		}
 
-    /// <remarks/>
-    [System.SerializableAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
-    public partial class OptionsSettingsMaximizedTaskbarStyle
-    {
+		/// <remarks/>
+		public byte WindowsAccentAlpha
+		{
+			get
+			{
+				return windowsAccentAlphaField;
+			}
+			set
+			{
+				windowsAccentAlphaField = value;
+				if (UseWindowsAccentColor) { Taskbars.UpdateColor(); }
+			}
+		}
+	}
 
-        private byte accentStateField;
+	/// <remarks/>
+	[Serializable()]
+	[System.ComponentModel.DesignerCategory("code")]
+	[XmlType(AnonymousType = true)]
+	public partial class OptionsSettingsMaximizedTaskbarStyle
+	{
 
-        private string gradientColorField;
+		private byte accentStateField;
 
-        private bool colorizeField;
+		private string gradientColorField;
 
-        private bool useWindowsAccentColorField;
+		private bool colorizeField;
 
-        private byte windowsAccentAlphaField;
+		private bool useWindowsAccentColorField;
 
-        /// <remarks/>
-        public byte AccentState
-        {
-            get
-            {
-                return this.accentStateField;
-            }
-            set
-            {
-                this.accentStateField = value;
-                Taskbars.UpdateAccentState();
-            }
-        }
+		private byte windowsAccentAlphaField;
 
-        /// <remarks/>
-        public string GradientColor
-        {
-            get
-            {
-                return this.gradientColorField;
-            }
-            set
-            {
-                this.gradientColorField = value;
-                Taskbars.UpdateColor();
-            }
-        }
+		/// <remarks/>
+		public byte AccentState
+		{
+			get
+			{
+				return accentStateField;
+			}
+			set
+			{
+				accentStateField = value;
+				Taskbars.UpdateAccentState();
+			}
+		}
 
-        /// <remarks/>
-        public bool Colorize
-        {
-            get
-            {
-                return this.colorizeField;
-            }
-            set
-            {
-                this.colorizeField = value;
-                Taskbars.UpdateAccentFlags();
-            }
-        }
+		/// <remarks/>
+		public string GradientColor
+		{
+			get
+			{
+				return gradientColorField;
+			}
+			set
+			{
+				gradientColorField = value;
+				Taskbars.UpdateColor();
+			}
+		}
 
-        /// <remarks/>
-        public bool UseWindowsAccentColor
-        {
-            get
-            {
-                return this.useWindowsAccentColorField;
-            }
-            set
-            {
-                this.useWindowsAccentColorField = value;
-                Taskbars.UpdateColor();
-            }
-        }
+		/// <remarks/>
+		public bool Colorize
+		{
+			get
+			{
+				return colorizeField;
+			}
+			set
+			{
+				colorizeField = value;
+				Taskbars.UpdateAccentFlags();
+			}
+		}
 
-        /// <remarks/>
-        public byte WindowsAccentAlpha
-        {
-            get
-            {
-                return this.windowsAccentAlphaField;
-            }
-            set
-            {
-                this.windowsAccentAlphaField = value;
-                if (UseWindowsAccentColor) { Taskbars.UpdateColor(); }
-            }
-        }
-    }
+		/// <remarks/>
+		public bool UseWindowsAccentColor
+		{
+			get
+			{
+				return useWindowsAccentColorField;
+			}
+			set
+			{
+				useWindowsAccentColorField = value;
+				Taskbars.UpdateColor();
+			}
+		}
+
+		/// <remarks/>
+		public byte WindowsAccentAlpha
+		{
+			get
+			{
+				return windowsAccentAlphaField;
+			}
+			set
+			{
+				windowsAccentAlphaField = value;
+				if (UseWindowsAccentColor) { Taskbars.UpdateColor(); }
+			}
+		}
+	}
 
 
-    #endregion XML Classes
+	#endregion XML Classes
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -17,7 +17,6 @@ using TaskbarTool.Structs;
 using Microsoft.Win32;
 using System.Reflection;
 using System.Text;
-using TaskbarTool.Properties;
 
 namespace TaskbarTool
 {
@@ -28,32 +27,33 @@ namespace TaskbarTool
 	{
 		#region Declarations
 		// Main window initialization
-		bool WindowInitialized = false;
-		string MyPath = Assembly.GetExecutingAssembly().Location;
-
-		// Taskbars
-		static Task ApplyTask;
-		static bool RunApplyTask = false;
+		bool _windowInitialized;
+		readonly string _applicationPath = Assembly.GetExecutingAssembly().Location;
+		// Flag to close the application
+		bool doExit = false;
+		// Task bars
+		static Task _applyTask;
+		static bool _runApplyTask;
 		public static bool FindTaskbarHandles = true;
 
-		static System.Windows.Forms.NotifyIcon SysTrayIcon;
-		ContextMenu SysTrayContextMenu;
+		static System.Windows.Forms.NotifyIcon _sysTrayIcon;
+		readonly ContextMenu _sysTrayContextMenu;
 
-		private static bool alphaDragStarted = false;
+		private static bool _alphaDragStarted;
 
-		// Explorer restarts and Windows Accent Colour changes
-		private static readonly uint WM_TASKBARCREATED = Externals.RegisterWindowMessage("TaskbarCreated");
+		// Explorer restarts and Windows Accent Color changes
+		private static readonly uint TaskbarCreated = Externals.RegisterWindowMessage("TaskbarCreated");
 
 		// Window state hook
-		private static Externals.WinEventDelegate procDelegate = new Externals.WinEventDelegate(WinEventProc);
-		private static IntPtr WindowStateHook;
-		private static IntPtr LastClosedWindow;
-		private static DateTime LastClosedWindowTime;
+		private static readonly Externals.WinEventDelegate ProcDelegate = WinEventProc;
+		private static IntPtr _windowStateHook;
+		private static IntPtr _lastClosedWindow;
+		private static DateTime _lastClosedWindowTime;
 
 		// Start with Windows registry key
-		RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+		readonly RegistryKey _appRegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-		private StringBuilder windowClass = new StringBuilder(32);
+		private readonly StringBuilder _windowClass = new StringBuilder(32);
 		#endregion Declarations
 
 		#region Initializations
@@ -61,25 +61,36 @@ namespace TaskbarTool
 		{
 			InitializeComponent();
 
-			SysTrayContextMenu = this.FindResource("TrayContextMenu") as ContextMenu;
+			_sysTrayContextMenu = FindResource("TrayContextMenu") as ContextMenu;
 
-			SysTrayIcon = new System.Windows.Forms.NotifyIcon();
+			_sysTrayIcon = new System.Windows.Forms.NotifyIcon();
 			var iconStream = Application.GetResourceStream(new Uri("Resources/tt-logo.ico", UriKind.Relative)).Stream;
-			SysTrayIcon.Icon = new System.Drawing.Icon(iconStream);
-			SysTrayIcon.Visible = true;
-			SysTrayIcon.MouseClick += SysTrayIcon_MouseClick;
-			SysTrayIcon.DoubleClick +=
-				delegate (object sender, EventArgs args)
+			_sysTrayIcon.Icon = new System.Drawing.Icon(iconStream);
+			_sysTrayIcon.Visible = true;
+			_sysTrayIcon.MouseClick += SysTrayIcon_MouseClick;
+			_sysTrayIcon.DoubleClick +=
+				delegate
 				{
-					this.Show();
-					this.WindowState = WindowState.Normal;
+					Show();
+					WindowState = WindowState.Normal;
 				};
+		}
+
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			if (!doExit)
+			{
+				e.Cancel = true;
+				Hide();
+			}
 		}
 
 		protected override void OnStateChanged(EventArgs e)
 		{
 			if (WindowState == WindowState.Minimized)
-				this.Hide();
+			{
+				Hide();
+			}
 
 			base.OnStateChanged(e);
 		}
@@ -99,11 +110,16 @@ namespace TaskbarTool
 			UseMaximizedSettingsCheckBox.IsChecked = TT.Options.Settings.UseDifferentSettingsWhenMaximized;
 			StartMinimizedCheckBox.IsChecked = TT.Options.Settings.StartMinimized;
 			StartWhenLaunchedCheckBox.IsChecked = TT.Options.Settings.StartWhenLaunched;
+
+			if (TT.Options.Settings.StartMinimized)
+			{
+				Hide();
+			}
 		}
 
 		private void SaveSettings()
 		{
-			TT.Options.Settings.MainTaskbarStyle.AccentState = (byte)((int)AccentStateComboBox.SelectedItem);
+			TT.Options.Settings.MainTaskbarStyle.AccentState = (byte)(int)AccentStateComboBox.SelectedItem;
 			TT.Options.Settings.MainTaskbarStyle.GradientColor = GradientColorPicker.SelectedColor.ToString();
 			TT.Options.Settings.MainTaskbarStyle.WindowsAccentAlpha = (byte)WindowsAccentAlphaSlider.Value;
 			TT.Options.Settings.MainTaskbarStyle.Colorize = ColorizeBlurCheckBox.IsChecked ?? false;
@@ -120,37 +136,39 @@ namespace TaskbarTool
 		{
 			PopulateComboBoxes();
 			LoadSettings();
-			WindowInitialized = true;
+			_windowInitialized = true;
 
-			if (TT.Options.Settings.StartMinimized) { this.WindowState = WindowState.Minimized; }
+			if (TT.Options.Settings.StartMinimized) { WindowState = WindowState.Minimized; }
 			if (TT.Options.Settings.StartWhenLaunched) { StartStopButton_Click(null, null); }
 
 			// Listen for name change changes across all processes/threads on current desktop
-			WindowStateHook = Externals.SetWinEventHook(EVENT_MIN, EVENT_MAX, IntPtr.Zero, procDelegate, 0, 0, WINEVENT_OUTOFCONTEXT);
+			_windowStateHook = Externals.SetWinEventHook(EVENT_MIN, EVENT_MAX, IntPtr.Zero, ProcDelegate, 0, 0, WINEVENT_OUTOFCONTEXT);
 		}
 		#endregion Initializations
 
-		#region Destructors
+		#region Destructor
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			SysTrayIcon.Dispose();
+			_sysTrayIcon.Dispose();
 			SaveSettings();
-			RunApplyTask = false;
-			Externals.UnhookWinEvent(WindowStateHook);
+			_runApplyTask = false;
+			Externals.UnhookWinEvent(_windowStateHook);
 		}
 
 		private void CloseMainWindow(object sender, RoutedEventArgs e)
 		{
-			this.Close();
+			SaveSettings();
+			doExit = true;
+			Close();
 		}
-		#endregion Destructors
+		#endregion Destructor
 
 		#region Functions
 		private void ApplyToAllTaskbars()
 		{
 			Taskbars.Bars = new List<Taskbar>();
 
-			while (RunApplyTask)
+			while (_runApplyTask)
 			{
 				if (FindTaskbarHandles)
 				{
@@ -162,9 +180,9 @@ namespace TaskbarTool
 					Taskbars.Bars.Add(new Taskbar(Externals.FindWindowEx(IntPtr.Zero, IntPtr.Zero, "", "Start")));
 
 					var foregroundWindowHandle = NativeMethods.GetForegroundWindow();
-					NativeMethods.GetClassName(foregroundWindowHandle, windowClass, windowClass.Capacity);
+					NativeMethods.GetClassName(foregroundWindowHandle, _windowClass, _windowClass.Capacity);
 					// foreground window class equal start menu window class?                  
-					if (windowClass.ToString().Equals(NativeMethods.StartMenuClass))
+					if (_windowClass.ToString().Equals(NativeMethods.StartMenuClass))
 					{
 						Taskbars.Bars.Add(new Taskbar(foregroundWindowHandle));
 					}
@@ -184,7 +202,7 @@ namespace TaskbarTool
 
 					FindTaskbarHandles = false;
 
-					App.Current.Dispatcher.Invoke(() => UpdateAllSettings());
+					Application.Current.Dispatcher.Invoke(UpdateAllSettings);
 				}
 
 				if (Taskbars.MaximizedStateChanged)
@@ -213,7 +231,7 @@ namespace TaskbarTool
 
 		private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
 		{
-			if (msg == WM_TASKBARCREATED)
+			if (msg == TaskbarCreated)
 			{
 				FindTaskbarHandles = true;
 				handled = true;
@@ -240,8 +258,8 @@ namespace TaskbarTool
 			{
 				if (MaximizedWindows.Contains(hwnd))
 				{
-					LastClosedWindow = hwnd;
-					LastClosedWindowTime = DateTime.Now;
+					_lastClosedWindow = hwnd;
+					_lastClosedWindowTime = DateTime.Now;
 					MaximizedWindows.Remove(hwnd);
 					Taskbars.MaximizedStateChanged = true;
 				}
@@ -250,7 +268,7 @@ namespace TaskbarTool
 			{
 				if (!MaximizedWindows.Contains(hwnd))
 				{
-					if (LastClosedWindow == hwnd && ((TimeSpan)(DateTime.Now - LastClosedWindowTime)).TotalSeconds < 1) { return; }
+					if (_lastClosedWindow == hwnd && ((TimeSpan)(DateTime.Now - _lastClosedWindowTime)).TotalSeconds < 1) { return; }
 
 					MaximizedWindows.Add(hwnd);
 					Taskbars.MaximizedStateChanged = true;
@@ -319,37 +337,37 @@ namespace TaskbarTool
 		#region Control Handles
 		private void StartStopButton_Click(object sender, RoutedEventArgs e)
 		{
-			if (RunApplyTask)
+			if (_runApplyTask)
 			{
 				StartStopButton.Content = "Start";
-				RunApplyTask = false;
+				_runApplyTask = false;
 			}
 			else
 			{
 				StartStopButton.Content = "Stop";
-				RunApplyTask = true;
+				_runApplyTask = true;
 
-				ApplyTask = new Task(() => ApplyToAllTaskbars());
-				ApplyTask.Start();
+				_applyTask = new Task(() => ApplyToAllTaskbars());
+				_applyTask.Start();
 			}
 		}
 
 		private void AccentStateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if (!WindowInitialized) return;
+			if (!_windowInitialized) return;
 			SetAccentState((AccentState)AccentStateComboBox.SelectedItem);
 		}
 
 		private void GradientColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
 		{
-			if (!WindowInitialized) return;
+			if (!_windowInitialized) return;
 
 			SetTaskbarColor(GradientColorPicker.SelectedColor ?? Color.FromArgb(255, 255, 255, 255));
 		}
 
 		private void ColorizeBlurCheckBox_Changed(object sender, RoutedEventArgs e)
 		{
-			if (!WindowInitialized) return;
+			if (!_windowInitialized) return;
 			SetAccentFlags(ColorizeBlurCheckBox.IsChecked ?? false);
 		}
 
@@ -358,9 +376,9 @@ namespace TaskbarTool
 			var me = (System.Windows.Forms.MouseEventArgs)e;
 			if (me.Button == System.Windows.Forms.MouseButtons.Right)
 			{
-				SysTrayContextMenu.PlacementTarget = sender as Button;
-				SysTrayContextMenu.IsOpen = true;
-				this.Activate();
+				_sysTrayContextMenu.PlacementTarget = sender as Button;
+				_sysTrayContextMenu.IsOpen = true;
+				Activate();
 			}
 		}
 
@@ -368,7 +386,7 @@ namespace TaskbarTool
 		{
 			Globals.WindowsAccentColor = WindowsAccentColor.GetColorAsInt();
 
-			if (!WindowInitialized) return;
+			if (!_windowInitialized) return;
 
 			var use = WindowsAccentColorCheckBox.IsChecked ?? false;
 			SetUseAccentColor(use);
@@ -377,26 +395,26 @@ namespace TaskbarTool
 
 		private void UseMaximizedSettingsCheckBox_Changed(object sender, RoutedEventArgs e)
 		{
-			if (!WindowInitialized) return;
+			if (!_windowInitialized) return;
 			TT.Options.Settings.UseDifferentSettingsWhenMaximized = UseMaximizedSettingsCheckBox.IsChecked ?? false;
 			Taskbars.UpdateAllSettings();
 		}
 
 		private void WindowsAccentAlphaSlider_DragCompleted(object sender, RoutedEventArgs e)
 		{
-			alphaDragStarted = false;
+			_alphaDragStarted = false;
 			SetWindowsAccentAlpha((byte)WindowsAccentAlphaSlider.Value);
 		}
 
 		private void WindowsAccentAlphaSlider_DragStarted(object sender, RoutedEventArgs e)
 		{
-			alphaDragStarted = true;
+			_alphaDragStarted = true;
 		}
 
 		private void WindowsAccentAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			if (!WindowInitialized) return;
-			if (!alphaDragStarted)
+			if (!_windowInitialized) return;
+			if (!_alphaDragStarted)
 			{
 				SetWindowsAccentAlpha((byte)WindowsAccentAlphaSlider.Value);
 			}
@@ -407,25 +425,25 @@ namespace TaskbarTool
 			if (MainGrid.RowDefinitions[2].Height == new GridLength(0))
 			{
 				MainGrid.RowDefinitions[2].Height = new GridLength(90);
-				this.Height += 90;
+				Height += 90;
 			}
 			else
 			{
 				MainGrid.RowDefinitions[2].Height = new GridLength(0);
-				this.Height -= 90;
+				Height -= 90;
 			}
 		}
 
 		private void StartWithWindowsCheckBox_Changed(object sender, RoutedEventArgs e)
 		{
-			if (!WindowInitialized) return;
+			if (!_windowInitialized) return;
 
 			TT.Options.Settings.StartWithWindows = StartWithWindowsCheckBox.IsChecked ?? false;
 
 			try
 			{
-				if (TT.Options.Settings.StartWithWindows) { rkApp.SetValue("TaskbarTools", $"\"{MyPath}\""); }
-				else { rkApp.DeleteValue("TaskbarTools", false); }
+				if (TT.Options.Settings.StartWithWindows) { _appRegistryKey.SetValue("TaskbarTools", $"\"{_applicationPath}\""); }
+				else { _appRegistryKey.DeleteValue("TaskbarTools", false); }
 			}
 			catch (Exception ex)
 			{
